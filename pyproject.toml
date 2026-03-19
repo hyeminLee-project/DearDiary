@@ -1,0 +1,13 @@
+[project]
+name = "deardiary"
+version = "0.1.0"
+description = "감성 일기 자동 생성기 (영어 + 한글)"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.30.0",
+    "openai>=1.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+start = "streamlit run app.py"
