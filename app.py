@@ -1,35 +1,62 @@
-# app.py
-
-# import streamlit as st
-# from diary_writer import generate_diary
-
-# st.title("📝 LLM 일기 자동 생성기")
-
-# with st.form("diary_form"):
-#     keywords = st.text_input("오늘의 키워드 (쉼표로 구분)", "커피, 친구, 피곤함")
-#     emotion = st.selectbox("오늘의 감정", ["😊 행복함", "😐 평범함", "😢 우울함", "😠 짜증남"])
-#     highlight = st.text_input("가장 기억에 남는 일", "오랜만에 친구와 커피 마심")
-#     submitted = st.form_submit_button("일기 생성하기")
-
-# if submitted:
-#     with st.spinner("일기 생성 중..."):
-#         result = generate_diary(keywords, emotion, highlight)
-#         st.markdown("### ✨ 생성된 일기")
-#         st.markdown(result)
-
-
 import streamlit as st
-import requests
-from googletrans import Translator
+from openai import OpenAI, AuthenticationError, RateLimitError, APIError
 
+from config import (
+    OPENAI_API_KEY,
+    OPENAI_MODEL,
+    APP_TITLE,
+    APP_DESCRIPTION,
+    logger,
+)
+
+# --- Page Config ---
 st.set_page_config(page_title="감성 일기 생성기 (영어+한글)", page_icon="📝")
 
-st.title("📝 감성 일기 자동 생성기 (영어 + 한글)")
-st.markdown("llama3 모델과 번역기를 이용해 오늘의 일기를 영어와 한글로 동시에 생성합니다.")
+st.title(APP_TITLE)
+st.markdown(APP_DESCRIPTION)
 
+
+# --- API Key Check ---
+if not OPENAI_API_KEY:
+    st.error("⚠️ OPENAI_API_KEY가 설정되지 않았습니다. `.env` 파일을 확인해주세요.")
+    logger.error("OPENAI_API_KEY is not set")
+    st.stop()
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+
+# --- Diary Generation ---
+SYSTEM_PROMPT = "You are an emotional diary writer. Write calm, heartfelt diary entries in Notion style. Always include a 💡 Today's Thought section at the end."
+
+
+def _call_llm(prompt: str) -> str:
+    response = client.chat.completions.create(
+        model=OPENAI_MODEL,
+        max_tokens=1024,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+    )
+    return response.choices[0].message.content
+
+
+def generate_diary(keywords: str, highlight: str) -> tuple[str, str]:
+    english_diary = _call_llm(
+        f"Write a diary entry in ENGLISH only.\n\nKeywords: {keywords}\nHighlight: {highlight}"
+    )
+    korean_diary = _call_llm(
+        f"Write a diary entry in KOREAN only (한국어로만 작성).\n\nKeywords: {keywords}\nHighlight: {highlight}"
+    )
+    return english_diary.strip(), korean_diary.strip()
+
+
+# --- UI ---
 with st.form("diary_form"):
     keywords = st.text_input("🔑 오늘의 키워드 (예: nephew, birthday, Bing Su)", "")
-    highlight = st.text_input("🌟 오늘의 하이라이트 (예: Had dinner with nephew for their birthday)", "")
+    highlight = st.text_input(
+        "🌟 오늘의 하이라이트 (예: Had dinner with nephew for their birthday)", ""
+    )
     submitted = st.form_submit_button("📖 일기 생성하기")
 
 if submitted:
@@ -37,36 +64,27 @@ if submitted:
         st.warning("키워드와 하이라이트를 모두 입력해주세요.")
     else:
         with st.spinner("🧠 일기 생성 중..."):
-            prompt = f"""
-Write a calm and emotional diary in Notion style based on:
-
-- Keywords: {keywords}
-- Highlight: {highlight}
-
-Sections:
-- 💡 Today's Thought
-"""
-
             try:
-                # llama3 모델 호출
-                response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={"model": "llama3", "prompt": prompt, "stream": False}
-                )
-                english_diary = response.json()["response"]
+                logger.info("Generating diary — keywords=%s", keywords)
+                english_diary, korean_diary = generate_diary(keywords, highlight)
+                logger.info("Diary generated")
 
-                # 한국어 번역
-                translator = Translator()
-                translated = translator.translate(english_diary, src="en", dest="ko")
-                korean_diary = translated.text
-
-                # 결과 출력
                 st.success("✅ 일기 생성 완료!")
                 st.markdown("### 🇺🇸 영어 일기")
                 st.markdown(english_diary)
                 st.markdown("---")
-                st.markdown("### 🇰🇷 한국어 번역 일기")
+                st.markdown("### 🇰🇷 한국어 일기")
                 st.markdown(korean_diary)
 
+            except AuthenticationError:
+                logger.error("Invalid OPENAI_API_KEY")
+                st.error("API 키가 유효하지 않습니다. `.env` 파일을 확인해주세요.")
+            except RateLimitError:
+                logger.error("OpenAI API rate limit exceeded")
+                st.error("API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.")
+            except APIError as e:
+                logger.error("OpenAI API error: %s", e)
+                st.error(f"OpenAI API 오류: {e}")
             except Exception as e:
+                logger.error("Unexpected error during diary generation: %s", e)
                 st.error(f"일기 생성 중 오류 발생: {e}")
