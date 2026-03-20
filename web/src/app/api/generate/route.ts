@@ -45,13 +45,17 @@ export async function POST(request: Request) {
       korean: korean.trim(),
     });
   } catch (error) {
-    console.error("Diary generation error:", error);
-    const message =
-      error instanceof OpenAI.AuthenticationError
-        ? "API 키가 유효하지 않습니다."
-        : error instanceof OpenAI.RateLimitError
-          ? "API 요청 한도를 초과했습니다."
-          : "일기 생성 중 오류가 발생했습니다.";
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Diary generation error:", errorMessage);
+
+    let message: string;
+    if (error instanceof OpenAI.AuthenticationError) {
+      message = "API 키가 유효하지 않습니다.";
+    } else if (error instanceof OpenAI.RateLimitError) {
+      message = "API 요청 한도를 초과했습니다.";
+    } else {
+      message = `일기 생성 중 오류가 발생했습니다: ${errorMessage}`;
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
