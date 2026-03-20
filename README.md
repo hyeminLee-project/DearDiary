@@ -4,8 +4,11 @@
 
 **Live Demo**: [https://web-seven-alpha-38.vercel.app](https://web-seven-alpha-38.vercel.app)
 
-<!-- TODO: 스크린샷 추가 -->
-<!-- ![Dear Diary Screenshot](./docs/screenshot.png) -->
+## Screenshots
+
+| 입력 폼 | 영어 일기 | 한국어 일기 |
+|:---:|:---:|:---:|
+| ![Form](./docs/screenshot-form.png) | ![English](./docs/screenshot-english.png) | ![Korean](./docs/screenshot-korean.png) |
 
 ## Features
 
