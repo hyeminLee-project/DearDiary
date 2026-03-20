@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 const SYSTEM_PROMPT =
   "You are an emotional diary writer. Write calm, heartfelt diary entries in Notion style. Always include a 💡 Today's Thought section at the end. Keep it concise (under 200 words).";
 
+function getClient() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
+
 async function callLLM(prompt: string): Promise<string> {
-  const response = await openai.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: process.env.OPENAI_MODEL || "gpt-4o-mini",
     max_tokens: 1024,
     messages: [
