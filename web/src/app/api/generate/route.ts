@@ -10,7 +10,7 @@ function getClient() {
 
 async function callLLM(prompt: string): Promise<string> {
   const response = await getClient().chat.completions.create({
-    model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    model: "gpt-4o-mini",
     max_tokens: 1024,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
