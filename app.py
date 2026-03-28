@@ -84,7 +84,7 @@ if submitted:
                 st.error("API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.")
             except APIError as e:
                 logger.error("OpenAI API error: %s", e)
-                st.error(f"OpenAI API 오류: {e}")
+                st.error("OpenAI API 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
             except Exception as e:
                 logger.error("Unexpected error during diary generation: %s", e)
-                st.error(f"일기 생성 중 오류 발생: {e}")
+                st.error("일기 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
