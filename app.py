@@ -63,14 +63,18 @@ if submitted:
 
             st.markdown("### 🇺🇸 영어 일기")
             st.write_stream(
-                _stream_llm(f"Write a diary entry in ENGLISH only.\n\nKeywords: {keywords}\nHighlight: {highlight}")
+                _stream_llm(
+                    f"Write a diary entry in ENGLISH only.\n\nKeywords: {keywords}\nHighlight: {highlight}"
+                )
             )
 
             st.markdown("---")
 
             st.markdown("### 🇰🇷 한국어 일기")
             st.write_stream(
-                _stream_llm(f"Write a diary entry in KOREAN only (한국어로만 작성).\n\nKeywords: {keywords}\nHighlight: {highlight}")
+                _stream_llm(
+                    f"Write a diary entry in KOREAN only (한국어로만 작성).\n\nKeywords: {keywords}\nHighlight: {highlight}"
+                )
             )
 
             logger.info("Diary generated")

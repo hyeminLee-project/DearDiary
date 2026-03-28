@@ -11,3 +11,8 @@ dependencies = [
 
 [project.scripts]
 start = "streamlit run app.py"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.8",
+]
