@@ -1,4 +1,4 @@
-# DearDiary
+# dear-diary
 
 Bilingual (English + Korean) emotional diary generator using OpenAI GPT via Streamlit.
 

@@ -1,5 +1,5 @@
 [project]
-name = "deardiary"
+name = "dear-diary"
 version = "0.1.0"
 description = "감성 일기 자동 생성기 (영어 + 한글)"
 requires-python = ">=3.11"
