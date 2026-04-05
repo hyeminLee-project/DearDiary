@@ -1,47 +1,55 @@
 # dear-diary
 
-Bilingual (English + Korean) emotional diary generator using OpenAI GPT via Streamlit.
+Bilingual (English + Korean) emotional diary generator using OpenAI GPT-4o-mini via Next.js.
 
 ## Tech Stack
 
-- **Python 3.11+**, managed with `uv`
-- **Streamlit** — web UI framework
-- **OpenAI API** (gpt-4o-mini default) — diary generation
-- **Docker** — containerized deployment
+- **Next.js 16** (App Router) + React 19 + TypeScript
+- **Tailwind CSS v4** — styling
+- **OpenAI API** (gpt-4o-mini) — diary generation with SSE streaming
+- **html2canvas-pro** — diary card image export
+- **Vercel** — deployment
 
 ## Project Structure
 
-- `app.py` — Streamlit app: UI, diary generation logic, error handling
-- `config.py` — Configuration (env vars, logging setup)
-- `main.py` — Entry point (placeholder)
-- `pyproject.toml` / `uv.lock` — Dependencies
-- `Dockerfile` / `docker-compose.yml` — Container setup (port 8501)
+```text
+web/
+├── src/
+│   ├── app/
+│   │   ├── api/generate/route.ts   # OpenAI diary generation API (SSE)
+│   │   ├── page.tsx                # Main input form
+│   │   ├── layout.tsx              # Root layout
+│   │   └── globals.css             # Global styles (warm palette)
+│   └── components/
+│       └── diary-result.tsx        # Result card + SNS sharing
+├── .env.example
+└── package.json
+```
 
 ## Common Commands
 
 ```bash
 # Install dependencies
-uv sync
+cd web && npm install
 
 # Run locally
-uv run streamlit run app.py
+npm run dev
 
-# Run with Docker
-docker compose up --build
+# Build
+npm run build
 
-# Add a dependency
-uv add <package>
+# Lint
+npm run lint
 ```
 
 ## Environment Variables
 
-Defined in `.env` (see `.env.example`):
+In `web/.env.local` (see `web/.env.example`):
+
 - `OPENAI_API_KEY` — required
-- `OPENAI_MODEL` — optional (default: gpt-4o-mini)
-- `LOG_LEVEL` — optional (default: INFO)
 
 ## Style & Conventions
 
 - UI text is in Korean; code/logs are in English
-- Use `config.logger` for logging
-- OpenAI errors handled per type: `AuthenticationError`, `RateLimitError`, `APIError`
+- OpenAI errors handled per type in API route
+- SSE streaming for real-time diary generation
